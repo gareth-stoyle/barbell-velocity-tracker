@@ -1,77 +1,64 @@
 #include <Arduino.h>
-
-// defines consts
-const int trigPin = 19;
-const int echoPin = 18;
-const float speedOfSound = 0.034; // Speed of sound in m/s
-const float maxDistance = 2.0; // Maximum distance in m, anything else is anomolous
-const float minDistance = 0.02; // Minimum distance in m, anything else is anomolous
-
-// defines variables
-long duration;
-float old_distance, current_distance, distance_diff;
-unsigned long old_time, current_time;
-float time_diff; // seconds
-float bar_velocity;
-float max_bar_velocity;
-int ticks;
+#include "main.h"
+#include "logging.h"
+#include "sensor.h"
+#include "distance.h"
+#include "rep_phase.h"
+#include <queue>
+#include <cassert>
 
 void setup() {
-    pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-    pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-    Serial.begin(115200); // Starts the serial communication
+    init_sensor();
     old_time = micros();
-    ticks = 0;
-    old_distance = 0.0;
-    max_bar_velocity = 0.0;
+    delayMicroseconds(10000);
 }
 
+bool is_outlier(float distance, float avg) {
+    return fabs(distance - avg) > (OUTLIER_THRESH * avg);
+}
 
 void loop() {
-    if (ticks < 200) {
-        // Clears the trigPin
-        digitalWrite(trigPin, LOW);
-        delayMicroseconds(2);
-        // Sets the trigPin on HIGH state for 10 micro seconds
-        digitalWrite(trigPin, HIGH);
-        delayMicroseconds(10);
-        digitalWrite(trigPin, LOW);
-        // Reads the echoPin, returns the sound wave travel time in microseconds
-        duration = pulseIn(echoPin, HIGH);
-        // Calculating the distance in meters
-        current_distance = (duration * speedOfSound / 2) / 100;
+    float time_diff = 0.0f; // seconds
+    long duration = 0;
+    float distance = 0.0f;
+    float velocity = 0.0f;
+    unsigned long current_time = 0;
+    int current_state = old_state;
 
-        // If the distance is not within the range, assume it's anomolous and skip
-        if (current_distance > maxDistance || current_distance < minDistance) {
-            printf("Skipping anomolous distance: %d\n", current_distance);
+    if (ticks <= 1000) {
+        // Update time
+        current_time = micros();
+        time_diff = (current_time - old_time) / 1000000.0;  // seconds
+        duration = read_sensor();  // Calculating the distance in meters
+        distance = (duration * SPEED_OF_SOUND / 2) / 100;
+        velocity = (distance - previous_distance) / time_diff;
+
+        // stop velocity from starting off with ridiculously high reading
+        if (previous_distance == 0.0) velocity = 0.0;
+
+        if (!curr_distances_q.empty() && is_outlier(distance, curr_distances_avg)) {
+            Serial.println("Outlier detected, ignoring distance value:");
+            Serial.println(distance);
+            ticks++;
             return;
         }
-        distance_diff = current_distance - old_distance;
 
-        Serial.printf("Old Distance: %.4f - Distance: %.4f - Distance Diff: %.4f\n", old_distance, current_distance, distance_diff);
+        update_distance_calcs(distance, velocity);
+        update_velocity_calcs(velocity);
+        update_averages();
 
-        current_time = micros();
-        time_diff = (current_time - old_time) / 1000000.0; // seconds
-        Serial.printf("Old Time: %lu - Time: %lu - Time Diff (seconds): %.6f\n", old_time, current_time, time_diff);
+        current_state = get_state(current_state, state_distances_avg, curr_distances_avg, lag_distances_avg);
+        
+        if (current_state != old_state) handle_state_change(velocity);
 
-        bar_velocity = distance_diff / time_diff;
-        if (ticks < 10) {
-            ticks++;
-            old_distance = current_distance;
-            old_time = current_time;
-            delayMicroseconds(20000);
-            return;  // Skip first 10 iterations
-        }
-        else if (bar_velocity > max_bar_velocity) {
-            max_bar_velocity = bar_velocity;
+        if (DEBUG && ticks % 25 == 1) {
+            debug_output(time_diff, current_time, distance, current_state, curr_distances_avg, lag_distances_avg, state_distances_avg, state_velocity_avg, velocity);
         }
 
-        Serial.printf("Bar Velocity: %.4f -- Max Bar Velocity: %.4f\n\n", bar_velocity, max_bar_velocity);
-
-
-        old_distance = current_distance;
         old_time = current_time;
+        old_state = current_state;
+        previous_distance = distance;
         ticks++;
-        delayMicroseconds(20000);
+        delayMicroseconds(350);
     }
 }
