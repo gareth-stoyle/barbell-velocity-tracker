@@ -4,10 +4,14 @@
 #include "sensor.h"
 #include "distance.h"
 #include "rep_phase.h"
-#include <queue>
-#include <cassert>
+#include "bluetooth.h"
 
 void setup() {
+    Serial.begin(115200);
+    bluetooth_setup();
+    while (!deviceConnected) {
+        delay(1000);  
+    }
     init_sensor();
     old_time = micros();
     delayMicroseconds(10000);
@@ -25,7 +29,7 @@ void loop() {
     unsigned long current_time = 0;
     int current_state = old_state;
 
-    if (ticks <= 1000) {
+    if (ticks <= 10000 && deviceConnected) {
         // Update time
         current_time = micros();
         time_diff = (current_time - old_time) / 1000000.0;  // seconds
@@ -39,6 +43,8 @@ void loop() {
         if (!curr_distances_q.empty() && is_outlier(distance, curr_distances_avg)) {
             Serial.println("Outlier detected, ignoring distance value:");
             Serial.println(distance);
+            Serial.println(curr_distances_avg);
+            Serial.println(ticks);
             ticks++;
             return;
         }
@@ -51,14 +57,14 @@ void loop() {
         
         if (current_state != old_state) handle_state_change(velocity);
 
-        if (DEBUG && ticks % 25 == 1) {
+        if (DEBUG && ticks % 50 == 1) {
             debug_output(time_diff, current_time, distance, current_state, curr_distances_avg, lag_distances_avg, state_distances_avg, state_velocity_avg, velocity);
         }
 
         old_time = current_time;
         old_state = current_state;
         previous_distance = distance;
+        delayMicroseconds(5000);
         ticks++;
-        delayMicroseconds(350);
     }
 }

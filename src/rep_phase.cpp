@@ -1,4 +1,5 @@
 #include "rep_phase.h"
+#include "bluetooth.h"
 
 int phase_ticks = 0;
 int old_state = IDLE;
@@ -46,6 +47,13 @@ void handle_state_change(float velocity) {
     // If state changed, empty Q, and do any other necessary output / calcs
     if (DEBUG) {
         Serial.printf("Phase: %d -- Mean Vel: %.4f m/s\n", old_state, state_velocity_avg);
+    }
+    if (old_state == CONC) {
+        // cast state_velocity_avg as string and send bluetooth notification
+        char buf[16];
+        snprintf(buf, sizeof(buf), "%.4f", state_velocity_avg);
+        pCharacteristic->setValue(buf);
+        pCharacteristic->notify();
     }
     state_distances_q = curr_distances_q;
     state_distances_sum = curr_distances_sum;
