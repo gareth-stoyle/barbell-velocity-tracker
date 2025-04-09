@@ -64,7 +64,7 @@ void loop() {
         old_time = current_time;
         old_state = current_state;
         previous_distance = distance;
-        delayMicroseconds(5000);
+        delayMicroseconds(2000);
         ticks++;
     }
 }

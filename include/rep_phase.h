@@ -12,12 +12,18 @@
 
 // min number of ticks before a phase can be exited
 const int PHASE_MIN_TICKS = 5;
+
 // distance reduction to signify an eccentric phase
+// We can be loose with this number as we don't need accurate measurement
+// of eccentric rep speed.
 const float ECC_REP_THRESH = 0.03;
+
 // distance increase to signify a concentric phase
-const float CONC_REP_THRESH = 0.005;
+const float CONC_REP_THRESH = 0.01;
+
 // distance from previously calculated top_of_rep to say we may be at top again
 const float TOP_REP_THRESH = 0.01;
+
 // curr_distances_avg & lag_distances avg within this amount during concentric rep
 // indicates transition to idle
 const float CONC_IDLE_THRESH = 0.01;
