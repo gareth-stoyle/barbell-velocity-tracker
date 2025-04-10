@@ -1,6 +1,9 @@
 #include "bluetooth.h"
 #include <Arduino.h>
 
+#include <algorithm>
+#include <cctype>
+
 BLECharacteristic* pCharacteristic;
 bool deviceConnected = false;
 
@@ -15,6 +18,21 @@ void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
     ESP.restart();
 }
 
+class CharacteristicCallbacks : public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic* pCharacteristic) override {
+        std::string value = pCharacteristic->getValue();
+
+        value.erase(std::remove_if(value.begin(), value.end(), ::isspace), value.end());
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+
+        if (value == "restart" || value == "r") {
+            Serial.println("Restart command received!");
+            delay(100);
+            ESP.restart();
+        }
+    }
+};
+
 void bluetooth_setup() {
     BLEDevice::init("ESP32-BVT");
     BLEServer* pServer = BLEDevice::createServer();
@@ -24,10 +42,11 @@ void bluetooth_setup() {
 
     pCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_UUID,
-        BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_READ
+        BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_NOTIFY | BLECharacteristic::PROPERTY_READ
     );
 
     pCharacteristic->addDescriptor(new BLE2902());
+    pCharacteristic->setCallbacks(new CharacteristicCallbacks());
     pCharacteristic->setValue("0");
     pService->start();
     pServer->getAdvertising()->start();
