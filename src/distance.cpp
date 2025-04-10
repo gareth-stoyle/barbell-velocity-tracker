@@ -18,6 +18,7 @@ float state_velocity_sum = 0.0f;
 float state_velocity_avg = 0.0f;
 
 float previous_distance = 0.0f;
+float previous_state_avg = 200.0f;
 
 void update_distance_calcs(float distance, float velocity) {
     float removed_curr_dist_val = 0.0f;

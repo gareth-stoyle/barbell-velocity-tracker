@@ -29,6 +29,7 @@ extern float state_velocity_sum;
 extern float state_velocity_avg;
 
 extern float previous_distance;
+extern float previous_state_avg;
 
 void update_distance_calcs(float distance, float velocity);
 void update_velocity_calcs(float velocity);

@@ -43,8 +43,6 @@ void loop() {
         if (!curr_distances_q.empty() && is_outlier(distance, curr_distances_avg)) {
             Serial.println("Outlier detected, ignoring distance value:");
             Serial.println(distance);
-            Serial.println(curr_distances_avg);
-            Serial.println(ticks);
             ticks++;
             return;
         }
@@ -57,14 +55,14 @@ void loop() {
         
         if (current_state != old_state) handle_state_change(velocity);
 
-        if (DEBUG && ticks % 50 == 1) {
+        if (DEBUG && ticks % 25 == 1) {
             debug_output(time_diff, current_time, distance, current_state, curr_distances_avg, lag_distances_avg, state_distances_avg, state_velocity_avg, velocity);
         }
 
         old_time = current_time;
         old_state = current_state;
         previous_distance = distance;
-        delayMicroseconds(2000);
+        delayMicroseconds(LOOP_DELAY);
         ticks++;
     }
 }
