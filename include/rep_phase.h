@@ -6,9 +6,11 @@
 
 #define DEBUG 1
 // Rep phases
-#define IDLE 0
-#define ECC 1
-#define CONC 2
+enum class PhaseState {
+    IDLE,
+    ECC,
+    CONC
+};
 
 // min number of ticks before a phase can be exited
 const int PHASE_MIN_TICKS = 15;
@@ -36,11 +38,12 @@ extern String data_buf;
 
 extern int phase_ticks;
 // state of the previous loop
-extern int old_state;
+extern PhaseState old_state;
 // Top of rep to help determine when CONC phase over
 extern float top_of_rep;
 
-int get_state(int current_state, float state_distances_avg, float curr_distances_avg, float lag_distances_avg);
-void handle_state_change(float velocity);
+const char* phaseStateToStr(PhaseState state);
+PhaseState get_state(PhaseState current_state, RepState& rep_state);
+void handle_state_change(RepState& rep_state, float velocity);
 
 #endif

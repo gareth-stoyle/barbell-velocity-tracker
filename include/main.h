@@ -11,11 +11,9 @@ void loop();
 
 // Speed of sound in m/s
 const float SPEED_OF_SOUND = 0.034;
-
-// 30% deviation from the rolling average 
-const float OUTLIER_THRESH = 0.5;
-
 const int LOOP_DELAY = 2000;
+const int MAX_TICKS = 22500;
+const float MICROSECONDS_PER_SECOND = 1000000.0;
 
 // no. of loops
 int ticks = 0;
