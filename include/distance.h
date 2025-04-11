@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "rep_state.h"
+#include "sensor.h"
 #include <cassert>
 
 // Number of ticks to average
@@ -14,8 +15,8 @@ const int STATE_DIST_MAX_SIZE = 200;
 // % accepted deviation from the rolling average 
 const float OUTLIER_THRESH = 0.5;
 
-void update_distance_calcs(RepState& state, float distance, float velocity);
-void update_velocity_calcs(RepState& state, float velocity);
+void update_distance_calcs(RepState& state, SensorReading& sensor_reading);
+void update_velocity_calcs(RepState& state, SensorReading& sensor_reading);
 void update_averages(RepState& state);
 bool is_outlier(float distance, float avg);
 

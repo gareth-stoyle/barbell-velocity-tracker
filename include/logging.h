@@ -6,6 +6,6 @@
 
 #define DEBUG 1
 
-void debug_output(float time_diff, float current_time, float distance, PhaseState current_state, RepState& rep_state, float velocity);
+void debug_output(float time_diff, float current_time, PhaseState current_state, RepState& rep_state, SensorReading& sensor_reading);
 
 #endif

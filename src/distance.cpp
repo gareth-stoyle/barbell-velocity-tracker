@@ -1,7 +1,7 @@
 #include "distance.h"
 
 
-void update_distance_calcs(RepState& rep_state, float distance, float velocity) {
+void update_distance_calcs(RepState& rep_state, SensorReading& sensor_reading) {
     float removed_curr_dist_val = 0.0f;
     float removed_state_dist_val = 0.0f;
     assert(rep_state.lag_distances_q.size() <= rep_state.curr_distances_q.size());
@@ -29,8 +29,8 @@ void update_distance_calcs(RepState& rep_state, float distance, float velocity) 
     }
 
     // Add the new value to curr_distances_q and adjust the running sum
-    rep_state.curr_distances_q.push(distance);
-    rep_state.curr_distances_sum += distance;
+    rep_state.curr_distances_q.push(sensor_reading.distance);
+    rep_state.curr_distances_sum += sensor_reading.distance;
 
     // keep state_distances_q limited in size
     if (rep_state.state_distances_q.size() > STATE_DIST_MAX_SIZE) {
@@ -40,10 +40,10 @@ void update_distance_calcs(RepState& rep_state, float distance, float velocity) 
     }
 }
 
-void update_velocity_calcs(RepState& rep_state, float velocity) {
+void update_velocity_calcs(RepState& rep_state, SensorReading& sensor_reading) {
     // add to state_velocity_q no matter what
-    rep_state.state_velocity_q.push(velocity);
-    rep_state.state_velocity_sum += velocity;
+    rep_state.state_velocity_q.push(sensor_reading.velocity);
+    rep_state.state_velocity_sum += sensor_reading.velocity;
 
     // keep state_velocity_q limited in size
     if (rep_state.state_velocity_q.size() > STATE_DIST_MAX_SIZE) {

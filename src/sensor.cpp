@@ -5,7 +5,7 @@ void init_sensor() {
     pinMode(ECHO_PIN, INPUT);
 }
 
-long read_sensor() {
+void read_sensor(SensorReading& sensor_reading, float previous_distance, float time_diff) {
     long reading;
     // Clears the trigPin
     digitalWrite(TRIG_PIN, LOW);
@@ -15,6 +15,7 @@ long read_sensor() {
     delayMicroseconds(10);
     digitalWrite(TRIG_PIN, LOW);
     // Reads the echoPin, returns the sound wave travel time in microseconds
-    reading = pulseIn(ECHO_PIN, HIGH);
-    return reading;
+    sensor_reading.duration = pulseIn(ECHO_PIN, HIGH);
+    sensor_reading.distance = (sensor_reading.duration * SPEED_OF_SOUND / 2) / 100;
+    sensor_reading.velocity = (sensor_reading.distance - previous_distance) / time_diff;
 }

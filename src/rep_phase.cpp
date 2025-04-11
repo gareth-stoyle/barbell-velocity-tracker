@@ -53,7 +53,7 @@ PhaseState get_state(PhaseState current_state, RepState& rep_state) {
     return current_state;
 }
 
-void handle_state_change(RepState& rep_state, float velocity) {
+void handle_state_change(RepState& rep_state, SensorReading& sensor_reading) {
     // If state changed, empty Q, and do any other necessary output / calcs
     if (DEBUG) {
         Serial.printf("Phase: %d -- Mean Vel: %.2f m/s -- Peak Vel: %.2f\n", old_state, rep_state.state_velocity_avg, rep_state.peak_velocity);
@@ -78,9 +78,9 @@ void handle_state_change(RepState& rep_state, float velocity) {
 
     // reset state velocity measurements
     rep_state.state_velocity_q = {};
-    rep_state.state_velocity_q.push(velocity);
-    rep_state.state_velocity_sum = velocity;
-    rep_state.state_velocity_avg = velocity;
+    rep_state.state_velocity_q.push(sensor_reading.velocity);
+    rep_state.state_velocity_sum = sensor_reading.velocity;
+    rep_state.state_velocity_avg = sensor_reading.velocity;
 
     rep_state.peak_velocity = 0.0;
 

@@ -44,6 +44,6 @@ extern float top_of_rep;
 
 const char* phaseStateToStr(PhaseState state);
 PhaseState get_state(PhaseState current_state, RepState& rep_state);
-void handle_state_change(RepState& rep_state, float velocity);
+void handle_state_change(RepState& rep_state, SensorReading& sensor_reading);
 
 #endif
