@@ -7,6 +7,7 @@ This is called [Velocity Based Training (BVT)](https://www.scienceforsport.com/v
 # Demo
 ![VBT](examples/demo.gif)
 
+**Note:** the concentric (pushing phase of the rep) mean velocity is what you are seeing here, as this value is what we are concerned with when it comes to VBT.
 
 # Improvements required
 - The overall rig could be put together a lot better.
